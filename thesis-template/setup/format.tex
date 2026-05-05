@@ -79,7 +79,7 @@
   \PackageError{thesis-fonts}{No CJK sans font found}{Install SimHei / Noto Sans CJK SC.}
 \fi\fi\fi
 
-% ----- 中文等宽（仿宋）：FangSong → STFangsong → SimSun -----
+% ----- 中文等宽（仿宋）：FangSong → STFangsong → SimSun → 思源宋体（Linux 兜底） -----
 \ifthesis@hasFangSong
   \setCJKmonofont{FangSong}
 \else\ifthesis@hasSTFangsong
@@ -88,9 +88,12 @@
 \else\ifthesis@hasSimSun
   \setCJKmonofont{SimSun}
   \PackageWarning{thesis-fonts}{FangSong / STFangsong missing, fallback to SimSun}
+\else\ifthesis@hasNotoSerifCJK
+  \setCJKmonofont{Noto Serif CJK SC}
+  \PackageWarning{thesis-fonts}{No 仿宋 found, fallback to Noto Serif CJK SC}
 \else
-  \PackageError{thesis-fonts}{No CJK mono font found}{Install FangSong or SimSun.}
-\fi\fi\fi
+  \PackageError{thesis-fonts}{No CJK mono font found}{Install FangSong or Noto CJK.}
+\fi\fi\fi\fi
 
 % ----- \heiti -----
 \ifthesis@hasSimHei
@@ -122,22 +125,28 @@
 \else\ifthesis@hasSimSun
   \newCJKfontfamily{\fangsong}{SimSun}
   \PackageWarning{thesis-fonts}{FangSong missing for \string\fangsong, using SimSun}
+\else\ifthesis@hasNotoSerifCJK
+  \newCJKfontfamily{\fangsong}{Noto Serif CJK SC}
+  \PackageWarning{thesis-fonts}{FangSong missing for \string\fangsong, using Noto Serif CJK SC}
 \else
-  \PackageError{thesis-fonts}{No font available for \string\fangsong}{Install FangSong.}
-\fi\fi\fi
+  \PackageError{thesis-fonts}{No font available for \string\fangsong}{Install FangSong or Noto CJK.}
+\fi\fi\fi\fi
 
-% ----- \huawenzhongsong（封面校名常用）：STZhongsong → STSong → SimSun -----
+% ----- \huawenzhongsong（封面校名常用）：STZhongsong → STSong → SimSun → 思源宋体 -----
 \ifthesis@hasSTZhongsong
   \newCJKfontfamily{\huawenzhongsong}{STZhongsong}
 \else\ifthesis@hasSTSong
   \newCJKfontfamily{\huawenzhongsong}{STSong}
-  \PackageWarning{thesis-fonts}{STZhongsong missing, fallback to STSong (cover may look slightly different)}
+  \PackageWarning{thesis-fonts}{STZhongsong missing, fallback to STSong}
 \else\ifthesis@hasSimSun
   \newCJKfontfamily{\huawenzhongsong}{SimSun}
   \PackageWarning{thesis-fonts}{STZhongsong missing, fallback to SimSun (cover may look slightly different)}
+\else\ifthesis@hasNotoSerifCJK
+  \newCJKfontfamily{\huawenzhongsong}{Noto Serif CJK SC}
+  \PackageWarning{thesis-fonts}{STZhongsong missing, fallback to Noto Serif CJK SC}
 \else
-  \PackageError{thesis-fonts}{No font available for \string\huawenzhongsong}{Install STZhongsong or SimSun.}
-\fi\fi\fi
+  \PackageError{thesis-fonts}{No font available for \string\huawenzhongsong}{Install STZhongsong or Noto CJK.}
+\fi\fi\fi\fi
 
 % ----- 西文：Times / Liberation Serif / TeX Gyre Termes -----
 \ifthesis@hasTimes

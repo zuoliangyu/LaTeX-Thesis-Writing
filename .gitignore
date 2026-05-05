@@ -14,8 +14,9 @@
 *.synctex.gz
 *.toc
 
-# Claude Code local settings (per-user, not for sharing)
-.claude/settings.local.json
+# Claude Code 本地状态（per-user，不上传）
+# 只忽略仓库根的 .claude/，thesis-template/.claude/ 是模板要发布的进度记忆文件
+/.claude/
 
 # Editor / OS
 .DS_Store

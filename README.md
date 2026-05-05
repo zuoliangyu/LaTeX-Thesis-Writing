@@ -1,5 +1,8 @@
 # LaTeX Thesis Writing — 中文学位论文 LaTeX 模板 + Claude 写作辅助技能
 
+[![Compile Check](https://github.com/zuoliangyu/LaTeX-Thesis-Writing/actions/workflows/compile-check.yml/badge.svg)](https://github.com/zuoliangyu/LaTeX-Thesis-Writing/actions/workflows/compile-check.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 通用中文学位论文 LaTeX 模板，配套 Claude Code 写作辅助技能，帮助你在
 几分钟内搭建格式规范的毕业论文，专注于内容创作而非格式排版。
 
@@ -13,7 +16,7 @@
 - **跨平台字体支持**: Windows / Linux / macOS 字体配置（见 `setup/`）
 - **原生矢量绘图**: 内置 TikZ + PGFPlots + CircuiTikZ，流程图/架构图/数据图直接写代码生成，编译产出矢量 PDF
 - **AI 主动配图**: Claude 写章节时按"触发词→图类型"对照表自动识图，写到"架构/流程/对比/趋势"等关键词时主动用模板样式画图，无需用户事后提醒
-- **CI/CD 验证**: GitHub Actions 自动编译检查
+- **CI/CD 验证**: GitHub Actions 自动编译检查；本地可用 `pwsh tools/ci_check.ps1` 通过 Docker 复现 CI 环境，push 前先验
 
 ## 快速开始
 
@@ -37,8 +40,8 @@
 
 ```bash
 # 1. 克隆模板仓库
-git clone https://github.com/your-org/latex-thesis-package.git
-cd latex-thesis-package
+git clone https://github.com/zuoliangyu/LaTeX-Thesis-Writing.git
+cd LaTeX-Thesis-Writing
 
 # 2. 创建你的论文项目
 cp -r thesis-template my-thesis && cd my-thesis
@@ -81,7 +84,7 @@ git commit -m "完成第 3 章初稿"
 ## 项目结构
 
 ```
-latex_thesis_package/
+LaTeX-Thesis-Writing/
 ├── README.md                          # 本文件
 ├── LICENSE                            # MIT 许可证
 ├── CONTRIBUTING.md                    # 贡献指南
@@ -117,7 +120,8 @@ latex_thesis_package/
 ├── tools/
 │   ├── check_thesis.ps1               # PowerShell 格式预检
 │   ├── check_thesis.sh                # Bash 格式预检
-│   └── setup_env.ps1                  # 一键部署脚本
+│   ├── setup_env.ps1                  # 一键部署脚本
+│   └── ci_check.ps1                   # 本地 Docker 模拟 GitHub Actions
 │
 ├── docs/
 │   ├── customization.md               # 学校格式适配指南
