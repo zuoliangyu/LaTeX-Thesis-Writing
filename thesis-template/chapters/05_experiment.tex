@@ -1,0 +1,82 @@
+% 第 5 章 实验与结果分析
+%===============================================================================
+% 修改记录:
+%   2026-05-05  创建
+%===============================================================================
+
+\chapter{实验与结果分析}
+\label{ch:experiment}
+
+\section{实验设置}
+\label{sec:setup}
+
+实验硬件平台为基于 STM32F407VGT6 的自制开发板，主频锁定 168~MHz，FSMC 工作
+于 84~MHz（HCLK/2）。SRAM 选用 IS62WV51216BLL-55TLI（55~ns 异步），LCD
+为 ILI9341（240$\times$320，16 位并口）。开发环境 STM32CubeIDE 1.13 + HAL
+库 V1.27，固件优化级别 \texttt{-O2}。性能测量基于 Cortex-M4 内置的 DWT 周期
+计数器，单次测试取 100 次平均。对比基准包括厂家推荐配置~\cite{stm32rm0090}
+与文献~\cite{zhang2021timing}所提方案。
+
+\section{实验结果}
+\label{sec:results}
+
+\subsection{SRAM 写带宽随 DATAST 的变化}
+
+固定 \texttt{ADDSET}=1、\texttt{ADDHLD}=1，扫描 \texttt{DATAST} 取值 1--9，
+测得 SRAM 写入 1~MB 数据的实际带宽如图~\ref{fig:exp_bw}所示。当
+\texttt{DATAST}$\le$3 时出现读回错误，故有效区间为 4--9。本文自适应方法
+在 \texttt{DATAST}=4 处停下，达到 58.7~MB/s，较厂家推荐的 \texttt{DATAST}=9
+（35.2~MB/s）提升 67\%。
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[thesis,
+            xlabel={DATAST (HCLK 周期)}, ylabel={写带宽 (MB/s)},
+            xtick={4,5,6,7,8,9}, ymin=30, ymax=65,
+            legend pos=north east]
+            \addplot+[mark=*] coordinates
+                {(4,58.7) (5,52.1) (6,46.8) (7,42.3) (8,38.4) (9,35.2)};
+            \addlegendentry{实测带宽}
+            \addplot+[mark=square*, dashed] coordinates
+                {(4,60.0) (5,53.3) (6,48.0) (7,43.6) (8,40.0) (9,36.9)};
+            \addlegendentry{理论上限}
+        \end{axis}
+    \end{tikzpicture}
+    \caption{不同 DATAST 配置下的 SRAM 写带宽}
+    \label{fig:exp_bw}
+\end{figure}
+
+\subsection{多方案延迟对比}
+
+将本文方法与厂家推荐配置、文献~\cite{zhang2021timing}方案及无 FSMC 的
+GPIO 模拟方案在同一硬件平台上对比，LCD 全屏刷新（240$\times$320$\times$2~B
+$\approx$ 150~KB）的耗时如图~\ref{fig:exp_latency}所示。
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[thesis,
+            ybar, bar width=14pt,
+            symbolic x coords={GPIO 模拟, 厂家推荐, 文献\cite{zhang2021timing}, 本文方法},
+            xtick=data, x tick label style={font=\footnotesize, rotate=15, anchor=east},
+            ymin=0, ylabel={LCD 全屏刷新延迟 (ms)},
+            nodes near coords, nodes near coords style={font=\footnotesize}]
+            \addplot coordinates {(GPIO 模拟,142) (厂家推荐,28) (文献\cite{zhang2021timing},22) (本文方法,18)};
+        \end{axis}
+    \end{tikzpicture}
+    \caption{各方案 LCD 全屏刷新延迟对比}
+    \label{fig:exp_latency}
+\end{figure}
+
+\section{分析讨论}
+\label{sec:discussion}
+
+实验结果表明，本文所提自适应搜索方法在不依赖人工查表的前提下，使 SRAM
+写带宽逼近理论上限，剩余约 2\% 的差距来源于 AHB 仲裁开销与 DWT 计数器
+的边界误差，符合预期。LCD 刷新延迟相比 GPIO 模拟降低 87\%，相比厂家
+推荐降低 36\%，验证了 FSMC 在高速并行接口场景下的不可替代性。
+
+需要指出的是，本文实验仅覆盖室温（25~°C）单一工况。当工作温度变化或
+器件老化时，本文方法应配合一定的温度裕量（建议在搜索得到的最小值上加
+1 拍）以保证长期可靠性。

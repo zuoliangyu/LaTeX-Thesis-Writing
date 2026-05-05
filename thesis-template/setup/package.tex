@@ -1,0 +1,45 @@
+% ---------- setup/package.tex ----------
+
+\usepackage{fontspec}
+\usepackage{xeCJK}                    % 中日韩文字
+\usepackage{indentfirst}              % 首段缩进（中文论文必需）
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{float}                    % 提供 [H] 精确位置选项
+\usepackage{tikz}
+\usetikzlibrary{
+    arrows.meta,        % 箭头样式 -{Latex}, -{Stealth}
+    positioning,        % right=of node 等定位语法
+    shapes,             % 各种节点形状
+    shapes.geometric,   % 菱形、梯形等几何形状
+    calc,               % 坐标计算 ($(A)+(1,0)$)
+    fit,                % 用一个矩形框住若干节点
+    backgrounds,        % 背景层（绘制分组底色）
+    matrix,             % 矩阵式排布
+    chains,             % 链式排布（流程图常用）
+    decorations.pathreplacing, % 大括号、波浪线等装饰
+    decorations.markings,
+    patterns            % 节点填充图案
+}
+\usepackage{pgfplots}                 % 数据驱动的折线/柱状/散点图
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots}       % 多子图共享坐标
+\usepackage{circuitikz}               % 电路图（如不需要可注释）
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage{xspace}
+
+% hyperref 配置
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    urlcolor=black
+}

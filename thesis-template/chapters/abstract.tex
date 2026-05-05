@@ -1,0 +1,72 @@
+%===============================================================================
+% 中英文摘要
+%===============================================================================
+
+% ---------- 中文摘要 ----------
+\newpage
+\thispagestyle{plain}
+\begin{center}
+    \heiti\fontsize{18pt}{27pt}\selectfont 摘\hskip1em 要
+\end{center}
+\vspace{2.8mm}
+
+\fontsize{12pt}{18pt}\selectfont
+随着嵌入式系统对图形显示、数据采集与缓存容量的需求不断增长，STM32 系列
+微控制器内部 SRAM 已难以满足应用要求。可变静态存储器控制器（Flexible Static
+Memory Controller, FSMC）作为 STM32F4 系列内置的并行存储器接口外设，
+支持 SRAM、NOR Flash、PSRAM、NAND Flash 以及 LCD 等多种器件的连接，
+其时序参数的合理配置直接决定了访问带宽与系统稳定性。
+
+本文围绕 STM32F407 平台的 FSMC 外设展开研究，分析了 FSMC 内部结构与
+四个 Bank 的地址映射机制，推导了 SRAM 模式下读写时序参数（ADDSET、
+ADDHLD、DATAST、CLKDIV、BUSTURN）与系统总线频率的约束关系；提出
+一种自适应时序参数搜索方法，在保证访问稳定性的前提下最小化访问周期；
+基于 STM32F407 + IS62WV51216 SRAM + ILI9341 LCD 的硬件平台搭建了
+测试系统，对不同时序配置下的读写带宽进行了实测。
+
+实验结果表明，相比厂家推荐的保守时序配置，本文方法可将 SRAM 写带宽
+从 35.2 MB/s 提升至 58.7 MB/s，提升约 67\%；LCD 帧刷新延迟从 28 ms
+降至 18 ms。研究成果可为基于 STM32 的高速外设接口设计提供参考。
+
+\vspace{\baselineskip}
+\noindent{\heiti\fontsize{14pt}{21pt}\selectfont 关键词：}
+{\fontsize{12pt}{18pt}\selectfont STM32；FSMC；外扩存储器；时序参数；接口设计}
+
+% ---------- 英文摘要 ----------
+\newpage
+\thispagestyle{plain}
+\begin{center}
+    \bfseries\fontsize{18pt}{27pt}\selectfont Abstract
+\end{center}
+\vspace{2.8mm}
+
+\fontsize{12pt}{18pt}\selectfont
+With the increasing demand of embedded systems for graphical display, data
+acquisition, and large-capacity caching, the on-chip SRAM of STM32
+microcontrollers can no longer satisfy modern application requirements. The
+Flexible Static Memory Controller (FSMC), an on-chip parallel memory
+interface peripheral integrated in the STM32F4 series, supports a wide range
+of external devices including SRAM, NOR Flash, PSRAM, NAND Flash, and
+LCD modules. Proper configuration of its timing parameters directly
+determines the achievable access bandwidth and system stability.
+
+This thesis investigates the FSMC peripheral on the STM32F407 platform.
+The internal structure of the FSMC and the address-mapping mechanism of its
+four banks are analyzed, and the constraints between read/write timing
+parameters (ADDSET, ADDHLD, DATAST, CLKDIV, BUSTURN) and the bus
+frequency are derived for the SRAM mode. An adaptive timing-parameter
+search method is proposed to minimize the access cycle while preserving
+stability. A test platform consisting of an STM32F407, an IS62WV51216
+SRAM, and an ILI9341 LCD is implemented to measure the bandwidth under
+various timing configurations.
+
+Experimental results show that, compared with the conservative timing
+configuration recommended by the manufacturer, the proposed method
+improves the SRAM write bandwidth from 35.2 MB/s to 58.7 MB/s
+(approximately 67\%), and reduces the LCD frame-refresh latency from
+28 ms to 18 ms. The results provide a useful reference for designing
+high-speed peripheral interfaces on STM32 platforms.
+
+\vspace{\baselineskip}
+\noindent{\bfseries\fontsize{14pt}{21pt}\selectfont Key Words: }
+{\fontsize{12pt}{18pt}\selectfont STM32; FSMC; External Memory; Timing Parameters; Interface Design}

@@ -1,0 +1,51 @@
+#!/bin/bash
+# Git pre-commit hook: LaTeX 论文编译 + 引用完整性检查
+
+ERRORS=0
+
+CHANGED=$(git diff --cached --name-only --diff-filter=ACM | grep '\.tex$')
+
+if [ -z "$CHANGED" ]; then
+    exit 0
+fi
+
+# 运行 PowerShell 预检
+if command -v pwsh &> /dev/null; then
+    echo "=== 格式预检 ==="
+    pwsh -NoProfile tools/check_thesis.ps1 -Path "$CHANGED"
+    if [ $? -ne 0 ]; then
+        echo "[FAIL] 格式预检未通过"
+        ERRORS=$((ERRORS+1))
+    fi
+fi
+
+# 编译检查
+echo "=== 编译检查 ==="
+xelatex -interaction=nonstopmode thesis.tex > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "[FAIL] xelatex 编译失败"
+    ERRORS=$((ERRORS+1))
+else
+    echo "[PASS] 编译通过"
+fi
+
+# 检查未定义引用
+echo "=== 引用检查 ==="
+UNDEF=$(grep -c "??" thesis.aux 2>/dev/null)
+if [ "$UNDEF" -gt 0 ]; then
+    echo "[FAIL] 存在 $UNDEF 个未定义引用"
+    ERRORS=$((ERRORS+1))
+else
+    echo "[PASS] 引用完整"
+fi
+
+# 检查过满盒子
+echo "=== 版式检查 ==="
+OVERFULL=$(grep -c "Overfull" thesis.log 2>/dev/null)
+echo "[WARN] Overfull hbox 数量: $OVERFULL"
+
+if [ $ERRORS -gt 0 ]; then
+    echo "=== $ERRORS 个错误，禁止提交 ==="
+    exit 1
+fi
+echo "=== 检查通过 ==="

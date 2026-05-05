@@ -1,0 +1,73 @@
+name: Compile Check
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'thesis-template/**'
+      - 'tools/**'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'thesis-template/**'
+      - 'tools/**'
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install TeX Live
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            texlive-xetex \
+            texlive-latex-extra \
+            texlive-fonts-extra \
+            biber \
+            fonts-noto-cjk
+
+      - name: Compile thesis
+        working-directory: thesis-template
+        run: |
+          xelatex -interaction=nonstopmode -file-line-error thesis.tex
+          biber thesis
+          xelatex -interaction=nonstopmode -file-line-error thesis.tex
+          xelatex -interaction=nonstopmode -file-line-error thesis.tex
+
+      - name: Check for undefined references
+        working-directory: thesis-template
+        run: |
+          if grep -q "??" thesis.aux; then
+            echo "ERROR: Undefined references found"
+            grep "??" thesis.aux
+            exit 1
+          fi
+          echo "All references resolved"
+
+      - name: Check for PDF output
+        working-directory: thesis-template
+        run: |
+          if [ ! -f thesis.pdf ]; then
+            echo "ERROR: thesis.pdf not generated"
+            exit 1
+          fi
+          echo "PDF generated: $(du -h thesis.pdf | cut -f1)"
+
+      - name: Upload PDF as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: thesis-pdf
+          path: thesis-template/thesis.pdf
+          retention-days: 7
+
+      - name: Log warnings summary
+        if: always()
+        working-directory: thesis-template
+        run: |
+          echo "=== Overfull boxes ==="
+          grep -c "Overfull" thesis.log || echo "0"
+          echo "=== Font warnings ==="
+          grep -c "Font Warning" thesis.log || echo "0"

@@ -1,0 +1,220 @@
+% ---------- setup/format.tex ----------
+
+\geometry{top=2.54cm, bottom=2.54cm, left=3.17cm, right=3.17cm}
+\linespread{1.5}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0pt}
+\raggedbottom
+
+% 孤行控制
+\widowpenalty=10000
+\clubpenalty=10000
+
+% 图表按章编号（图3.1、表4.2）
+\counterwithin{figure}{chapter}
+\counterwithin{table}{chapter}
+
+% 浮动对象间距
+\setlength{\textfloatsep}{0.7\baselineskip plus 0.2\baselineskip minus 0.2\baselineskip}
+\setlength{\floatsep}{0.6\baselineskip plus 0.2\baselineskip minus 0.2\baselineskip}
+\setlength{\intextsep}{0.6\baselineskip plus 0.2\baselineskip minus 0.2\baselineskip}
+
+% ===== 字体回退链 =====
+% 缺字体时自动回落，避免编译失败。回退路径：
+%   宋体类 SimSun → Noto Serif CJK SC（Linux 思源）→ Songti SC（macOS）
+%   黑体类 SimHei → Noto Sans CJK SC → Heiti SC
+%   仿宋   FangSong → STFangsong（macOS）→ SimSun
+%   华文中宋 STZhongsong → SimSun
+% 实际使用了哪个字体，编译时会在 .log 里以 \PackageInfo 形式记录。
+% 想强制指定字体，把对应 \IfFontExistsTF 块替换为 \setCJKmainfont{...} 即可。
+
+% 预探测：把候选字体是否存在做成布尔开关。这一步不能放在 \newcommand 内部，
+% 因为 fontspec 的 \IfFontExistsTF 在 false 分支会触发 expl3 clist 映射，
+% 与外层 \newcommand 的参数 # 系统冲突 ("Illegal parameter number")。
+\makeatletter
+\newif\ifthesis@hasSimSun        \IfFontExistsTF{SimSun}{\thesis@hasSimSuntrue}{}
+\newif\ifthesis@hasSimHei        \IfFontExistsTF{SimHei}{\thesis@hasSimHeitrue}{}
+\newif\ifthesis@hasFangSong      \IfFontExistsTF{FangSong}{\thesis@hasFangSongtrue}{}
+\newif\ifthesis@hasSTZhongsong   \IfFontExistsTF{STZhongsong}{\thesis@hasSTZhongsongtrue}{}
+\newif\ifthesis@hasSTSong        \IfFontExistsTF{STSong}{\thesis@hasSTSongtrue}{}
+\newif\ifthesis@hasSTFangsong    \IfFontExistsTF{STFangsong}{\thesis@hasSTFangsongtrue}{}
+\newif\ifthesis@hasNotoSerifCJK  \IfFontExistsTF{Noto Serif CJK SC}{\thesis@hasNotoSerifCJKtrue}{}
+\newif\ifthesis@hasNotoSansCJK   \IfFontExistsTF{Noto Sans CJK SC}{\thesis@hasNotoSansCJKtrue}{}
+\newif\ifthesis@hasSongtiSC      \IfFontExistsTF{Songti SC}{\thesis@hasSongtiSCtrue}{}
+\newif\ifthesis@hasHeitiSC       \IfFontExistsTF{Heiti SC}{\thesis@hasHeitiSCtrue}{}
+\newif\ifthesis@hasTimes         \IfFontExistsTF{Times New Roman}{\thesis@hasTimestrue}{}
+\newif\ifthesis@hasArial         \IfFontExistsTF{Arial}{\thesis@hasArialtrue}{}
+\newif\ifthesis@hasCourier       \IfFontExistsTF{Courier New}{\thesis@hasCouriertrue}{}
+\newif\ifthesis@hasLibSerif      \IfFontExistsTF{Liberation Serif}{\thesis@hasLibSeriftrue}{}
+\newif\ifthesis@hasLibSans       \IfFontExistsTF{Liberation Sans}{\thesis@hasLibSanstrue}{}
+\newif\ifthesis@hasLibMono       \IfFontExistsTF{Liberation Mono}{\thesis@hasLibMonotrue}{}
+\newif\ifthesis@hasGyreTermes    \IfFontExistsTF{TeX Gyre Termes}{\thesis@hasGyreTermestrue}{}
+\newif\ifthesis@hasGyreHeros     \IfFontExistsTF{TeX Gyre Heros}{\thesis@hasGyreHerostrue}{}
+\newif\ifthesis@hasGyreCursor    \IfFontExistsTF{TeX Gyre Cursor}{\thesis@hasGyreCursortrue}{}
+
+% ----- 中文主字体（宋体）：SimSun → 思源宋体 → Songti SC -----
+\ifthesis@hasSimSun
+  \setCJKmainfont{SimSun}[AutoFakeBold=2.5]
+\else\ifthesis@hasNotoSerifCJK
+  \setCJKmainfont{Noto Serif CJK SC}[AutoFakeBold=2.5]
+  \PackageWarning{thesis-fonts}{SimSun missing, fallback to Noto Serif CJK SC}
+\else\ifthesis@hasSongtiSC
+  \setCJKmainfont{Songti SC}[AutoFakeBold=2.5]
+  \PackageWarning{thesis-fonts}{SimSun missing, fallback to Songti SC}
+\else
+  \PackageError{thesis-fonts}{No CJK serif font found (SimSun / Noto Serif CJK SC / Songti SC)}%
+    {Install one, or edit setup/format.tex.}
+\fi\fi\fi
+
+% ----- 中文无衬线（黑体）：SimHei → 思源黑体 → Heiti SC -----
+\ifthesis@hasSimHei
+  \setCJKsansfont{SimHei}[AutoFakeBold=2.5]
+\else\ifthesis@hasNotoSansCJK
+  \setCJKsansfont{Noto Sans CJK SC}[AutoFakeBold=2.5]
+  \PackageWarning{thesis-fonts}{SimHei missing, fallback to Noto Sans CJK SC}
+\else\ifthesis@hasHeitiSC
+  \setCJKsansfont{Heiti SC}[AutoFakeBold=2.5]
+  \PackageWarning{thesis-fonts}{SimHei missing, fallback to Heiti SC}
+\else
+  \PackageError{thesis-fonts}{No CJK sans font found}{Install SimHei / Noto Sans CJK SC.}
+\fi\fi\fi
+
+% ----- 中文等宽（仿宋）：FangSong → STFangsong → SimSun -----
+\ifthesis@hasFangSong
+  \setCJKmonofont{FangSong}
+\else\ifthesis@hasSTFangsong
+  \setCJKmonofont{STFangsong}
+  \PackageWarning{thesis-fonts}{FangSong missing, fallback to STFangsong}
+\else\ifthesis@hasSimSun
+  \setCJKmonofont{SimSun}
+  \PackageWarning{thesis-fonts}{FangSong / STFangsong missing, fallback to SimSun}
+\else
+  \PackageError{thesis-fonts}{No CJK mono font found}{Install FangSong or SimSun.}
+\fi\fi\fi
+
+% ----- \heiti -----
+\ifthesis@hasSimHei
+  \newCJKfontfamily{\heiti}{SimHei}[AutoFakeBold=2.5]
+\else\ifthesis@hasNotoSansCJK
+  \newCJKfontfamily{\heiti}{Noto Sans CJK SC}[AutoFakeBold=2.5]
+\else\ifthesis@hasHeitiSC
+  \newCJKfontfamily{\heiti}{Heiti SC}[AutoFakeBold=2.5]
+\else
+  \PackageError{thesis-fonts}{No font available for \string\heiti}{Install SimHei.}
+\fi\fi\fi
+
+% ----- \songti -----
+\ifthesis@hasSimSun
+  \newCJKfontfamily{\songti}{SimSun}
+\else\ifthesis@hasNotoSerifCJK
+  \newCJKfontfamily{\songti}{Noto Serif CJK SC}
+\else\ifthesis@hasSongtiSC
+  \newCJKfontfamily{\songti}{Songti SC}
+\else
+  \PackageError{thesis-fonts}{No font available for \string\songti}{Install SimSun.}
+\fi\fi\fi
+
+% ----- \fangsong -----
+\ifthesis@hasFangSong
+  \newCJKfontfamily{\fangsong}{FangSong}
+\else\ifthesis@hasSTFangsong
+  \newCJKfontfamily{\fangsong}{STFangsong}
+\else\ifthesis@hasSimSun
+  \newCJKfontfamily{\fangsong}{SimSun}
+  \PackageWarning{thesis-fonts}{FangSong missing for \string\fangsong, using SimSun}
+\else
+  \PackageError{thesis-fonts}{No font available for \string\fangsong}{Install FangSong.}
+\fi\fi\fi
+
+% ----- \huawenzhongsong（封面校名常用）：STZhongsong → STSong → SimSun -----
+\ifthesis@hasSTZhongsong
+  \newCJKfontfamily{\huawenzhongsong}{STZhongsong}
+\else\ifthesis@hasSTSong
+  \newCJKfontfamily{\huawenzhongsong}{STSong}
+  \PackageWarning{thesis-fonts}{STZhongsong missing, fallback to STSong (cover may look slightly different)}
+\else\ifthesis@hasSimSun
+  \newCJKfontfamily{\huawenzhongsong}{SimSun}
+  \PackageWarning{thesis-fonts}{STZhongsong missing, fallback to SimSun (cover may look slightly different)}
+\else
+  \PackageError{thesis-fonts}{No font available for \string\huawenzhongsong}{Install STZhongsong or SimSun.}
+\fi\fi\fi
+
+% ----- 西文：Times / Liberation Serif / TeX Gyre Termes -----
+\ifthesis@hasTimes
+  \setmainfont{Times New Roman}
+\else\ifthesis@hasLibSerif
+  \setmainfont{Liberation Serif}
+  \PackageWarning{thesis-fonts}{Times New Roman missing, fallback to Liberation Serif}
+\else\ifthesis@hasGyreTermes
+  \setmainfont{TeX Gyre Termes}
+  \PackageWarning{thesis-fonts}{Times New Roman missing, fallback to TeX Gyre Termes}
+\else
+  \PackageError{thesis-fonts}{No serif Latin font found}{Install Times New Roman.}
+\fi\fi\fi
+
+% ----- 西文 sans -----
+\ifthesis@hasArial
+  \setsansfont{Arial}
+\else\ifthesis@hasLibSans
+  \setsansfont{Liberation Sans}
+  \PackageWarning{thesis-fonts}{Arial missing, fallback to Liberation Sans}
+\else\ifthesis@hasGyreHeros
+  \setsansfont{TeX Gyre Heros}
+  \PackageWarning{thesis-fonts}{Arial missing, fallback to TeX Gyre Heros}
+\else
+  \PackageError{thesis-fonts}{No sans Latin font found}{Install Arial.}
+\fi\fi\fi
+
+% ----- 西文 mono -----
+\ifthesis@hasCourier
+  \setmonofont{Courier New}
+\else\ifthesis@hasLibMono
+  \setmonofont{Liberation Mono}
+  \PackageWarning{thesis-fonts}{Courier New missing, fallback to Liberation Mono}
+\else\ifthesis@hasGyreCursor
+  \setmonofont{TeX Gyre Cursor}
+  \PackageWarning{thesis-fonts}{Courier New missing, fallback to TeX Gyre Cursor}
+\else
+  \PackageError{thesis-fonts}{No mono Latin font found}{Install Courier New.}
+\fi\fi\fi
+\makeatother
+
+\usepackage{titlesec}
+\setlength{\headheight}{16pt}
+
+% 章标题：黑体 小二号(18pt) 居中 段前/段后 2.8mm
+\titleformat{\chapter}{\centering\heiti\fontsize{18pt}{27pt}\selectfont}
+  {第\,\thechapter\,章}{1em}{}
+\titlespacing*{\chapter}{0pt}{2.8mm}{2.8mm}
+
+% 节标题：黑体 三号(16pt) 左对齐 段前/段后 2.8mm
+\titleformat{\section}{\heiti\fontsize{16pt}{24pt}\selectfont}
+  {\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{2.8mm}{2.8mm}
+
+% 小节标题：黑体 四号(14pt) 左对齐 段前/段后 2.8mm
+\titleformat{\subsection}{\heiti\fontsize{14pt}{21pt}\selectfont}
+  {\thesubsection}{1em}{}
+\titlespacing*{\subsection}{0pt}{2.8mm}{2.8mm}
+
+\captionsetup[figure]{labelsep=quad, font={small, rm}, position=bottom}
+\captionsetup[table]{labelsep=quad, font={small, rm}, position=top}
+\setlength{\abovecaptionskip}{0.35\baselineskip}
+\setlength{\belowcaptionskip}{0.2\baselineskip}
+
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    numbers=left,
+    numberstyle=\tiny,
+    frame=single,
+    breaklines=true,
+    captionpos=b,
+    tabsize=4
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\fontsize{10.5pt}{15.75pt}\selectfont 大学名字毕业设计（论文）}
+\fancyfoot[C]{\fontsize{10.5pt}{15.75pt}\selectfont \thepage}
+\renewcommand{\headrulewidth}{0.65pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyhead[C]{\fontsize{10.5pt}{15.75pt}\selectfont 大学名字毕业设计（论文）}\fancyfoot[C]{\fontsize{10.5pt}{15.75pt}\selectfont \thepage}\renewcommand{\headrulewidth}{0.65pt}}

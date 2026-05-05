@@ -1,0 +1,57 @@
+% 第 3 章 系统设计
+%===============================================================================
+% 修改记录:
+%   2026-05-05  创建
+%===============================================================================
+
+\chapter{系统总体设计}
+\label{ch:system_design}
+
+\section{系统架构}
+\label{sec:arch}
+
+本测试系统以 STM32F407VGT6 为核心控制器，通过 FSMC 接口连接 SRAM 与
+TFT LCD，并以 USART 作为上位机调试通道，整体架构如
+图~\ref{fig:system_arch}所示。
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[node distance=0.7cm and 1.3cm]
+        \node[block/module, minimum width=2.6cm, minimum height=1.6cm] (mcu) {STM32F407\\ Cortex-M4\\ 168 MHz};
+        \node[block/module, right=of mcu, yshift=1.4cm]              (sram) {IS62WV51216\\ 1~MB SRAM};
+        \node[block/module, right=of mcu]                            (lcd)  {ILI9341\\ 2.8" TFT LCD};
+        \node[block/module, right=of mcu, yshift=-1.4cm]             (uart) {CH340\\ USB 转 UART};
+        \node[block/module, below=1.0cm of mcu]                      (jtag) {ST-Link V2\\ 仿真器};
+
+        \draw[block/signal] (mcu.east) -- node[above, font=\footnotesize, sloped] {FSMC Bank1-NE1} (sram.west);
+        \draw[block/signal] (mcu.east) -- node[above, font=\footnotesize] {FSMC Bank1-NE3} (lcd.west);
+        \draw[block/signal] (mcu.east) -- node[below, font=\footnotesize, sloped] {USART1} (uart.west);
+        \draw[block/signal] (jtag.north) -- node[right, font=\footnotesize] {SWD} (mcu.south);
+    \end{tikzpicture}
+    \caption{系统硬件总体框图}
+    \label{fig:system_arch}
+\end{figure}
+
+\section{硬件方案}
+\label{sec:hw}
+
+主控选用 STM32F407VGT6，其 100 引脚封装恰好引出 FSMC 所需的全部信号
+线。SRAM 选用 ISSI 公司的 IS62WV51216BLL-55TLI，容量 512K$\times$16~bit，
+访问时间 55~ns，工作电压 2.5--3.6~V，与 STM32 的 IO 电平直接兼容。
+LCD 控制器为 ILI9341，原生支持 8080 时序的 16 位并行接口，分辨率
+240$\times$320。SRAM 接 FSMC Bank~1 子区 1（NE1，基地址
+\texttt{0x6000\_0000}），LCD 接子区 3（NE3，基地址 \texttt{0x6800\_0000}），
+通过 A6 地址线区分命令与数据写入。
+
+\section{软件方案}
+\label{sec:sw}
+
+软件基于 STM32CubeMX 生成的 HAL 库工程开发。系统初始化阶段配置 RCC 将
+HCLK 锁定于 168~MHz；FSMC 通过 \texttt{HAL\_SRAM\_Init} 与
+\texttt{HAL\_SRAM\_Timing\_Init} 两步初始化，前者配置存储器类型、数据
+位宽、Bank 选择等静态属性，后者配置本文所关注的 \texttt{ADDSET}、
+\texttt{ADDHLD}、\texttt{DATAST}、\texttt{BUSTURN} 等时序参数。
+
+外扩 SRAM 初始化完成后，可像访问普通内存一样使用其地址空间。本文实现
+了一个轻量级的内存访问测试模块，对 SRAM 进行写满-读回校验，并通过 DWT
+计数器精确测量耗时。

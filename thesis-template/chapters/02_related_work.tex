@@ -1,0 +1,111 @@
+% 第 2 章 相关工作
+%===============================================================================
+% 修改记录:
+%   2026-05-05  创建
+%===============================================================================
+
+\chapter{相关技术与背景}
+\label{ch:related_work}
+
+\section{STM32F4 总线架构}
+\label{sec:stm32_bus}
+
+STM32F407 基于 ARM Cortex-M4 内核，最高主频 168~MHz。其片上互联采用
+多层 AHB 矩阵（Multi-AHB Bus Matrix）实现 CPU、DMA、外设之间的并行
+访问，整体架构如图~\ref{fig:stm32_bus}所示。FSMC 控制器挂载在 AHB3
+总线上，独占一条主线，避免与 USB OTG 等高带宽外设争抢资源。
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[node distance=0.5cm and 1.2cm]
+        \node[block/module]                                  (cpu)    {Cortex-M4\\ + FPU};
+        \node[block/module, below=of cpu]                    (dma1)   {DMA1};
+        \node[block/module, below=of dma1]                   (dma2)   {DMA2};
+        \node[block/bus, right=2.0cm of dma1, minimum height=3.6cm, minimum width=1.0cm,
+              text width=0.8cm, align=center] (matrix) {AHB\\ 总线\\ 矩阵};
+        \node[block/module, right=of matrix, yshift=1.4cm]   (sram)   {内部\\ SRAM};
+        \node[block/module, right=of matrix]                 (flash)  {Flash\\ 接口};
+        \node[block/module, right=of matrix, yshift=-1.4cm]  (fsmc)   {\textbf{FSMC}};
+
+        \draw[block/signal] (cpu)  -- (cpu  -| matrix.west);
+        \draw[block/signal] (dma1) -- (dma1 -| matrix.west);
+        \draw[block/signal] (dma2) -- (dma2 -| matrix.west);
+        \draw[block/signal] (sram.west)  -- (sram.west  -| matrix.east);
+        \draw[block/signal] (flash.west) -- (flash.west -| matrix.east);
+        \draw[block/signal] (fsmc.west)  -- (fsmc.west  -| matrix.east);
+    \end{tikzpicture}
+    \caption{STM32F407 多层 AHB 总线矩阵}
+    \label{fig:stm32_bus}
+\end{figure}
+
+\section{FSMC 概述}
+\label{sec:fsmc_overview}
+
+FSMC 将 256~MB 的外部存储空间划分为四个独立的 Bank（每个 64~MB），
+每个 Bank 可分别配置为不同的存储器类型与时序，地址映射如
+图~\ref{fig:fsmc_bank}所示~\cite{stm32rm0090}。
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[every node/.style={font=\small}]
+        \draw[thick] (0,0) rectangle (5,5);
+        \draw[thick] (0,1.25) -- (5,1.25);
+        \draw[thick] (0,2.50) -- (5,2.50);
+        \draw[thick] (0,3.75) -- (5,3.75);
+
+        \node at (2.5,4.375) {Bank~1: NOR/PSRAM/SRAM (4 子区)};
+        \node at (2.5,3.125) {Bank~2: NAND Flash};
+        \node at (2.5,1.875) {Bank~3: NAND Flash};
+        \node at (2.5,0.625) {Bank~4: PC Card};
+
+        \node[anchor=east] at (-0.1,5)    {\texttt{0x6000\_0000}};
+        \node[anchor=east] at (-0.1,3.75) {\texttt{0x7000\_0000}};
+        \node[anchor=east] at (-0.1,2.50) {\texttt{0x8000\_0000}};
+        \node[anchor=east] at (-0.1,1.25) {\texttt{0x9000\_0000}};
+        \node[anchor=east] at (-0.1,0)    {\texttt{0xA000\_0000}};
+    \end{tikzpicture}
+    \caption{FSMC 四个 Bank 的地址映射}
+    \label{fig:fsmc_bank}
+\end{figure}
+
+本文重点研究 Bank~1 在 SRAM 异步模式下的时序配置。该模式下涉及的关键
+时序参数定义见表~\ref{tab:fsmc_param}。
+
+\begin{table}[htbp]
+    \centering
+    \caption{FSMC SRAM 异步模式关键时序参数}
+    \label{tab:fsmc_param}
+    \begin{tabular}{llc}
+        \toprule
+        参数 & 含义 & 取值范围 \\
+        \midrule
+        \texttt{ADDSET}  & 地址建立时间（HCLK 周期数）   & 0--15 \\
+        \texttt{ADDHLD}  & 地址保持时间                 & 1--15 \\
+        \texttt{DATAST}  & 数据建立时间                 & 1--255 \\
+        \texttt{BUSTURN} & 总线翻转时间                 & 0--15 \\
+        \texttt{CLKDIV}  & 同步时钟分频系数              & 1--15 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{常见外设接口对比}
+\label{sec:device_compare}
+
+FSMC 兼容的外设种类繁多，本文研究中主要涉及 SRAM、NOR Flash 与并口
+LCD 三类，其特性对比见表~\ref{tab:device_cmp}。
+
+\begin{table}[htbp]
+    \centering
+    \caption{三类常见外设的接口特性对比}
+    \label{tab:device_cmp}
+    \begin{tabular}{lccc}
+        \toprule
+        特性 & 异步 SRAM & NOR Flash & 并口 LCD (8080) \\
+        \midrule
+        典型容量    & 1--8 Mbit & 16--128 Mbit & — \\
+        访问模式    & 随机读写 & 读快写慢 & 命令/数据分离 \\
+        典型时延    & 10--55 ns & 70--90 ns & 由控制器决定 \\
+        FSMC 配置 & 模式 1 / A & 模式 2 / B & 模式 1 + RS 寻址 \\
+        \bottomrule
+    \end{tabular}
+\end{table}

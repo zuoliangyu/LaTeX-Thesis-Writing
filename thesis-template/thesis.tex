@@ -1,0 +1,43 @@
+% !TEX program = xelatex
+%===============================================================================
+% 学位论文主文件
+%===============================================================================
+
+\documentclass[
+    a4paper,
+    12pt,
+    oneside,
+    openany
+]{book}
+
+\input{setup/package.tex}
+\input{setup/format.tex}
+\input{setup/command.tex}
+
+\usepackage[backend=biber, style=numeric]{biblatex}
+% 若安装 biblatex-gb7714-2015 宏包，应改用 style=gb7714-2015
+\addbibresource{refs.bib}
+
+\begin{document}
+
+\frontmatter
+\include{setup/titlepage}
+\tableofcontents
+\include{chapters/abstract}
+
+\mainmatter
+
+\include{chapters/01_introduction}
+\include{chapters/02_related_work}
+\include{chapters/03_system_design}
+\include{chapters/04_method}
+\include{chapters/05_experiment}
+\include{chapters/06_conclusion}
+
+\backmatter
+\emergencystretch=2em
+\printbibliography[heading=bibintoc]
+
+\include{chapters/acknowledgement}
+
+\end{document}

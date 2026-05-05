@@ -1,0 +1,77 @@
+% 第 1 章 绪论
+%===============================================================================
+% 修改记录:
+%   2026-05-05  创建
+%===============================================================================
+
+\chapter{绪论}
+\label{ch:introduction}
+
+\section{研究背景}
+\label{sec:background}
+
+近年来，以 ARM Cortex-M 系列内核为代表的嵌入式微控制器在工业控制、消费
+电子、物联网终端等领域获得了广泛应用~\cite{stm32rm0090}。意法半导体公司
+（STMicroelectronics）推出的 STM32 系列由于其丰富的外设资源、较高的性价
+比与完善的开发生态，已成为嵌入式开发的主流选择之一~\cite{yiu2014cortexm}。
+
+然而，随着图形界面、视频缓冲、海量数据采集等高带宽应用场景的普及，
+微控制器内部集成的 SRAM 容量（通常为 64~KB 至 256~KB）已难以满足实际
+需求。为此，STM32F2 及其后续系列在芯片内部集成了\term{可变静态存储器
+控制器}（Flexible Static Memory Controller, FSMC），用于扩展外部并行
+存储器与显示器件，其在嵌入式系统中的位置如图~\ref{fig:fsmc_position}所示。
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[node distance=0.6cm and 1.4cm]
+        \node[block/module]                                  (core)  {Cortex-M4\\ 内核};
+        \node[block/module, right=of core]                   (fsmc)  {FSMC\\ 控制器};
+        \node[block/module, right=of fsmc, yshift=1.2cm]     (sram)  {外部 SRAM};
+        \node[block/module, right=of fsmc]                   (lcd)   {TFT LCD};
+        \node[block/module, right=of fsmc, yshift=-1.2cm]    (nor)   {NOR Flash};
+
+        \draw[block/signal] (core) -- node[above, font=\footnotesize] {AHB} (fsmc);
+        \draw[block/signal] (fsmc) -- node[above, font=\footnotesize, sloped] {16-bit 数据} (sram);
+        \draw[block/signal] (fsmc) -- node[above, font=\footnotesize] {RGB / 8080} (lcd);
+        \draw[block/signal] (fsmc) -- node[below, font=\footnotesize, sloped] {地址 + 控制} (nor);
+    \end{tikzpicture}
+    \caption{FSMC 在 STM32 嵌入式系统中的位置}
+    \label{fig:fsmc_position}
+\end{figure}
+
+\section{研究现状}
+\label{sec:related}
+
+国内外学者对 FSMC 的应用研究主要集中在三个方向：一是基于 FSMC 的外部
+存储扩展方案设计~\cite{wang2019sram}，关注硬件连接与基本驱动的实现；二是
+基于 FSMC 的 LCD 高速刷新方案~\cite{li2020lcd}，研究 8080 时序模拟与帧缓
+冲管理；三是 FSMC 时序参数优化~\cite{zhang2021timing}，通过实验调整各项
+参数以获得最大带宽。
+
+现有研究多以"经验配置 + 实测验证"为主要方法，缺乏对时序参数与外设时序
+特性之间约束关系的系统性分析；此外，大多数工作只针对单一外设（如仅 SRAM
+或仅 LCD），未对不同存储器在同一平台上的性能进行横向对比。
+
+\section{本文工作}
+\label{sec:contributions}
+
+针对上述问题，本文围绕 STM32F407 平台展开如下工作：
+
+\begin{enumerate}
+    \item 分析 FSMC 内部结构与四个 Bank 的地址映射机制，推导 SRAM 模式
+          下时序参数与系统时钟频率的数学约束；
+    \item 提出一种自适应时序参数搜索方法，从厂家推荐的保守值出发逐步
+          收紧 \texttt{DATAST}、\texttt{ADDSET} 等关键参数，在出现读写
+          错误前一拍停止，得到稳定可用的最小周期配置；
+    \item 搭建基于 STM32F407 + IS62WV51216 SRAM + ILI9341 LCD 的实验
+          平台，对所提方法进行验证，并与厂家默认配置以及若干已发表方案
+          进行对比。
+\end{enumerate}
+
+\section{论文结构}
+\label{sec:structure}
+
+本文共分为六章：第 1 章为绪论；第 2 章介绍 STM32 总线架构、FSMC 概述
+与常见外设接口；第 3 章给出系统总体设计；第 4 章详细论述时序参数推导
+与自适应搜索方法；第 5 章给出实验设置与结果分析；第 6 章总结全文并展望
+后续工作。
