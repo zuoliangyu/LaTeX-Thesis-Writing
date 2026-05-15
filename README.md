@@ -16,6 +16,9 @@
 - **跨平台字体支持**: Windows / Linux / macOS 字体配置（见 `setup/`）
 - **原生矢量绘图**: 内置 TikZ + PGFPlots + CircuiTikZ，流程图/架构图/数据图直接写代码生成，编译产出矢量 PDF
 - **AI 主动配图**: Claude 写章节时按"触发词→图类型"对照表自动识图，写到"架构/流程/对比/趋势"等关键词时主动用模板样式画图，无需用户事后提醒
+- **去 AI 痕迹检测**: Claude 写完后按 24 项检测清单（夸张词、套路句、AI 高频词、虚假范围等）扫描中文学术文本，输出修改建议表
+- **文献检索引用规范**: 内置 Google Scholar 检索流程、文献评估标准（相关性/时效性/权威性/被引量）、GB/T 7714 引用规范、综述写作禁忌清单
+- **定稿前 14 项复盘检查**: 覆盖结构 / 用词 / 盲审匿名性 / 图表一致性 / 排版 / 逻辑六大维度，含图片颜色一致性脚本
 - **CI/CD 验证**: GitHub Actions 自动编译检查；本地可用 `pwsh tools/ci_check.ps1` 通过 Docker 复现 CI 环境，push 前先验
 
 ## 快速开始
@@ -92,7 +95,15 @@ LaTeX-Thesis-Writing/
 ├── CODE_OF_CONDUCT.md                 # 行为准则
 │
 ├── claude_skills/
-│   └── latex_thesis_writing.md        # Claude Code 技能文档
+│   └── latex_thesis_writing.md        # Claude Code 技能文档（11 大章节）
+│
+├── references/                        # 写作辅助参考素材（不参与编译）
+│   └── bishe-guider/                  # 中文学术论文规范细则（源自 jinhui-skills）
+│       ├── rule-01-humanizer/         # AI 痕迹检测原始规则
+│       ├── rule-02-reference-search/  # 文献检索原始规则
+│       ├── rule-03-thesis-writing/    # 论文写作要点原始规则
+│       ├── rule-04-review-check/      # 复盘检查原始规则 + check_figure_colors.py
+│       └── rule-05-project-init/      # 项目初始化原始规则 + 脚本
 │
 ├── thesis-template/                   # 可直接编译的模板项目
 │   ├── thesis.tex                     # 主文件（编译入口）
@@ -148,7 +159,7 @@ LaTeX-Thesis-Writing/
 后，Claude 写每一节正文时都会扫一遍内容，识别出"应该配图"的位置，
 **主动**用模板里预设的 TikZ/PGFPlots 样式生成矢量图，无需用户提醒。
 
-**触发词对照表**（节选，完整列表见技能文档 §9.0）：
+**触发词对照表**（节选，完整列表见技能文档 §6.0）：
 
 | 文本里出现 | 自动配图类型 | 使用样式 |
 |-----------|------------|---------|
@@ -241,6 +252,15 @@ tlmgr install biblatex-gb7714-2015
 - 补充学科特定模板（工科、理科、文科）
 - 提供 Linux/macOS 字体兼容方案
 - 改进 check_thesis 脚本
+
+## 致谢与参考来源
+
+本仓库 `claude_skills/latex_thesis_writing.md` 的「论文内容规范」「文献检索与引用」「去 AI 痕迹」「定稿前全面复盘」四大章节，参考并融合了 **bishe-guider** 技能的规范细则。原始素材保留在 `references/bishe-guider/`。
+
+- 来源页面: <https://kirigaya.cn/ktools/skillmanager/skill/1776952526866>
+- 源仓库: [LSTM-Kirigaya/jinhui-skills](https://github.com/LSTM-Kirigaya/jinhui-skills)（`skills/bishe-guider/`）
+
+感谢原作者整理的 24 项 AI 写作痕迹检测、14 项定稿复盘清单、Google Scholar 检索流程与图片颜色一致性脚本。
 
 ## 许可证
 
