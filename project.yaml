@@ -1,0 +1,12 @@
+name: LaTeX Thesis Writing
+authors: [左岚]
+category: Tool
+tags: [LaTeX, 学位论文, Claude Skills, 论文写作, 中文模板]
+status: done
+updated: 2026-05-19
+summary: 中文学位论文 LaTeX 模板 + Claude Code 写作辅助技能，含格式自检、AI 主动配图、去 AI 痕迹检测、定稿前 14 项复盘。
+
+readme: README.md
+
+links:
+  github: https://github.com/zuoliangyu/LaTeX-Thesis-Writing
